@@ -1,11 +1,18 @@
+import numpy as np
+import psutil
+import time
+import torch
 import typer
+
 from pathlib import Path
+from rich import box
 from rich.console import Console
 from rich.panel import Panel
-from rich.table import Table
 from rich.panel import Panel
-from rich import box
-import torch
+from rich.table import Table
+from typing import List, Tuple
+from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
+from utils.factory import ModelFactory, ConfigCreator, ModelConfig
 from utils.inference import (
     Torchvision_Inference,
     ImageProcessor,
@@ -13,7 +20,6 @@ from utils.inference import (
     PatchConfig,
     ProcessorConfig
 )
-from utils.factory import ModelFactory, ConfigCreator, ModelConfig
 
 # Initialize Typer app
 app = typer.Typer(help="CLI for running object detection inference on medical images using trained models.")
@@ -110,6 +116,60 @@ def print_model_config(config: ModelConfig) -> None:
 
 
 
+class PerformanceMonitor:
+    def __init__(self):
+        self.inference_times: List[float] = []
+        self.memory_usage: List[Tuple[float, float]] = []  # (GPU memory, CPU memory)
+        self.console = Console()
+
+    def get_gpu_memory(self) -> float:
+        """Get GPU memory usage in GB."""
+        if torch.cuda.is_available():
+            memory_allocated = torch.cuda.memory_allocated() / 1024**3  # Convert to GB
+            memory_reserved = torch.cuda.memory_reserved() / 1024**3
+            return memory_allocated, memory_reserved
+        return 0.0, 0.0
+
+    def get_cpu_memory(self) -> float:
+        """Get CPU memory usage in GB."""
+        return psutil.Process().memory_info().rss / 1024**3
+
+    def record_iteration(self, inference_time: float):
+        """Record performance metrics for one iteration."""
+        self.inference_times.append(inference_time)
+        gpu_allocated, gpu_reserved = self.get_gpu_memory()
+        cpu_usage = self.get_cpu_memory()
+        self.memory_usage.append((gpu_allocated, cpu_usage))
+
+    def print_summary(self):
+        """Print a summary of performance metrics."""
+        # Create performance table
+        table = Table(title="Performance Metrics", show_header=True)
+        table.add_column("Metric", style="cyan")
+        table.add_column("Value", style="green")
+
+        # Calculate statistics
+        avg_time = np.mean(self.inference_times)
+        std_time = np.std(self.inference_times)
+        max_gpu_allocated = max(m[0] for m in self.memory_usage)
+        avg_gpu_allocated = np.mean([m[0] for m in self.memory_usage])
+        max_cpu_usage = max(m[1] for m in self.memory_usage)
+        avg_cpu_usage = np.mean([m[1] for m in self.memory_usage])
+
+        # Add rows to table
+        table.add_row("Average Time per Image", f"{avg_time:.3f} seconds")
+        table.add_row("Std Dev Time", f"{std_time:.3f} seconds")
+        table.add_row("Max GPU Memory Allocated", f"{max_gpu_allocated:.2f} GB")
+        table.add_row("Average GPU Memory", f"{avg_gpu_allocated:.2f} GB")
+        table.add_row("Max CPU Memory", f"{max_cpu_usage:.2f} GB")
+        table.add_row("Average CPU Memory", f"{avg_cpu_usage:.2f} GB")
+        table.add_row("Total Images Processed", str(len(self.inference_times)))
+
+        self.console.print("\n")
+        self.console.print(table)
+
+
+
 @app.command()
 def detect(
     config_path: Path = typer.Argument(
@@ -159,6 +219,12 @@ def detect(
         "--overlap",
         "-o",
         help="Overlap between patches"
+    ),
+    measure_performance: bool = typer.Option(
+        False, 
+        "--measure-performance", 
+        "-m", 
+        help="Measure and report performance metrics"
     )
 ) -> None:
     """
@@ -191,7 +257,8 @@ def detect(
             ("Patch Size", str(patch_size)),
             ("Patch Overlap", f"{overlap:.2f}"),
             ("Input Path", str(input_path)),
-            ("Output Directory", str(output_dir))
+            ("Output Directory", str(output_dir)),
+            ("Measure Performance", "Yes" if measure_performance else "No")
         ]
 
         for param, value in runtime_params:
@@ -214,6 +281,9 @@ def detect(
         # Create output directory
         output_dir.mkdir(parents=True, exist_ok=True)
 
+        # Initialize performance monitor if requested
+        perf_monitor = PerformanceMonitor() if measure_performance else None
+
         # Process images
         if input_path.is_file():
             # Check if file extension is valid
@@ -223,12 +293,17 @@ def detect(
 
             # Single image processing
             console.print(f"\n[bold]Processing single image: {input_path.name}[/bold]")
-            processor.process_single(
-                input_path,
-                patch_config=patch_config,
-                output_dir=output_dir
-            )
+
+            if measure_performance:
+                start_time = time.time()
+                processor.process_single(input_path, patch_config=patch_config, output_dir=output_dir)
+                inference_time = time.time() - start_time
+                perf_monitor.record_iteration(inference_time)
+            else:
+                processor.process_single(input_path, patch_config=patch_config, output_dir=output_dir)
+            
             console.print(f"[green]Results saved to: {output_dir / f'{input_path.stem}_detections.json'}[/green]")
+            
 
         elif input_path.is_dir():
             # Batch processing
@@ -244,16 +319,34 @@ def detect(
 
             console.print(f"\n[bold]Found {len(image_paths)} valid images[/bold]")
             console.print(f"[bold]Processing {len(image_paths)} images...[/bold]")
-            processor.process_multi(
-                image_paths,
-                patch_config=patch_config,
-                output_dir=output_dir
-            )
+            
+            with Progress(
+                SpinnerColumn(),
+                *Progress.get_default_columns(),
+                TimeElapsedColumn(),
+                console=console,
+            ) as progress:
+                task = progress.add_task(f"Processing {len(image_paths)} images...", total=len(image_paths))
+
+                for img_path in image_paths:
+                    if measure_performance:
+                        start_time = time.time()
+                        processor.process_single(img_path, patch_config=patch_config, output_dir=output_dir)
+                        inference_time = time.time() - start_time
+                        perf_monitor.record_iteration(inference_time)
+                    else:
+                        processor.process_single(img_path, patch_config=patch_config, output_dir=output_dir)
+                    progress.advance(task)
+
             console.print(f"[green]Results saved to: {output_dir}[/green]")
 
         else:
             console.print("[red]Invalid input path![/red]")
             raise typer.Exit(1)
+        
+        # Print performance summary if requested
+        if measure_performance:
+            perf_monitor.print_summary()
 
     except Exception as e:
         console.print(f"[red]Error during processing: {str(e)}[/red]")
