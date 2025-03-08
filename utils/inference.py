@@ -405,16 +405,11 @@ class Torchvision_Inference(Strategy):
                 boxes = pred['boxes'] + torch.tensor(
                     [x_orig, y_orig, x_orig, y_orig],
                     device=pred['boxes'].device
-                )
-                # Filter by score threshold
-                mask = pred['scores'] >= self.config.score_thresh
-                boxes = boxes[mask]
-                scores = pred['scores'][mask]
-                labels = pred['labels'][mask]
+                )               
 
                 boxes_list.append(boxes)
-                scores_list.append(scores)
-                labels_list.append(labels)
+                scores_list.append(pred['scores'])
+                labels_list.append(pred['labels'])
 
         if not boxes_list:
             return {
@@ -444,17 +439,10 @@ class Torchvision_Inference(Strategy):
             final_scores.append(class_scores[keep])
             final_labels.append(labels[mask][keep])
 
-        # Concatenate and sort by score
+        # Concatenate 
         final_boxes = torch.cat(final_boxes)
         final_scores = torch.cat(final_scores)
         final_labels = torch.cat(final_labels)
-
-        # Sort by score
-        if len(final_scores) > 0:
-            sorted_indices = torch.argsort(final_scores, descending=True)
-            final_boxes = final_boxes[sorted_indices]
-            final_scores = final_scores[sorted_indices]
-            final_labels = final_labels[sorted_indices]
 
         return {
             'boxes': final_boxes,
@@ -499,13 +487,9 @@ class Torchvision_Inference(Strategy):
         # Process batches
         with tqdm(dataloader, desc="Processing patches") as pbar:
             for batch_images, batch_x, batch_y in pbar:
-                try:
-                    predictions = self._process_batch(batch_images)
-                    all_predictions.extend(predictions)
-                    all_coords.extend(zip(batch_x, batch_y))
-                except Exception as e:
-                    self.logger.error(f"Error processing batch: {str(e)}")
-                    continue
+                predictions = self._process_batch(batch_images)
+                all_predictions.extend(predictions)
+                all_coords.extend(zip(batch_x, batch_y))
 
         # Post-process results
         results = self._post_process_predictions(all_predictions, all_coords)
