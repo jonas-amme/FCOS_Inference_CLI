@@ -485,7 +485,7 @@ class Torchvision_Inference(Strategy):
         all_coords = []
 
         # Process batches
-        with tqdm(dataloader, desc="Processing patches") as pbar:
+        with tqdm(dataloader, desc="Processing batches") as pbar:
             for batch_images, batch_x, batch_y in pbar:
                 predictions = self._process_batch(batch_images)
                 all_predictions.extend(predictions)
