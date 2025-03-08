@@ -251,7 +251,8 @@ class ModelFactory:
             'num_classes': config.num_classes,
             'extra_blocks': config.extra_blocks,
             'returned_layers': config.returned_layers,
-            'weights': config.weights
+            'weights': config.weights,
+            'patch_size': config.patch_size
         }
 
         if isinstance(config, (FasterRCNN_Config, MaskRCNN_Config, RetinaNet_Config)):

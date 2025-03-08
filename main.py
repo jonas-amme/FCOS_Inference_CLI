@@ -90,7 +90,7 @@ def print_model_config(config: ModelConfig) -> None:
 
     # Add optional parameters if they exist
     if hasattr(config, 'weights') and config.weights:
-        main_table.add_row("Weights", str(config.weights))
+        main_table.add_row("Initial Weights", str(config.weights))
 
     if hasattr(config, 'returned_layers') and config.returned_layers:
         main_table.add_row("Returned Layers", str(config.returned_layers))
