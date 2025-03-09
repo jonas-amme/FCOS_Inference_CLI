@@ -1,5 +1,5 @@
 
-<img src="docs/banner.png" width="600px" align="center"/>
+<img src="docs/banner.png" width="100%" align="center"/>
 
 # FCOS Inference CLI
 
@@ -13,7 +13,7 @@ A simgple command-line interface (CLI) application for performing mitotic figure
 - **JSON Results**: Save detection results for each image in JSON format.
 
 ## Models 
-There are three models available. All three models are based on the [FCOS](https://arxiv.org/abs/1904.01355) implementation provided by torchvision. All three models were trained on the [MIDOG++] dataset and tested on the official [MIDOG 2022](https://www.sciencedirect.com/science/article/pii/S136184152400080X) test set. 
+There are three models available. All three models are based on the [FCOS](https://arxiv.org/abs/1904.01355) implementation provided by torchvision. All three models were trained on the [MIDOG++](https://www.nature.com/articles/s41597-023-02327-4) dataset and tested on the official [MIDOG 2022](https://www.sciencedirect.com/science/article/pii/S136184152400080X) test set. 
 
 The table below summarizes the results on the results on the MIDOG 2022 test set:
 
