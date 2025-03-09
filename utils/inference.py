@@ -386,7 +386,7 @@ class Torchvision_Inference(Strategy):
             predictions = self.model(images)
             return predictions
         except RuntimeError as e:
-            self.logger.error(f"Error during batch processing: {str(e)}")
+            self.logger.error(f"Error during foward pass: {str(e)}")
             raise
 
     def _post_process_predictions(
