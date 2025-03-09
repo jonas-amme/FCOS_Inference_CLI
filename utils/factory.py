@@ -97,6 +97,8 @@ class FasterRCNN_Config(ModelConfig):
         anchor_sizes (List[int], optional): Sizes of anchor boxes
         anchor_ratios (List[float], optional): Aspect ratios of anchor boxes
     """
+    anchor_sizes: List[int] = None
+    anchor_ratios: List[float] = None
 
 @dataclass(kw_only=True)
 class MaskRCNN_Config(ModelConfig):
@@ -108,6 +110,8 @@ class MaskRCNN_Config(ModelConfig):
         anchor_sizes (List[int], optional): Sizes of anchor boxes
         anchor_ratios (List[float], optional): Aspect ratios of anchor boxes
     """
+    anchor_sizes: List[int] = None
+    anchor_ratios: List[float] = None
 
 @dataclass(kw_only=True)
 class RetinaNet_Config(ModelConfig):
@@ -119,6 +123,8 @@ class RetinaNet_Config(ModelConfig):
         anchor_sizes (List[int], optional): Sizes of anchor boxes
         anchor_ratios (List[float], optional): Aspect ratios of anchor boxes
     """
+    anchor_sizes: List[int] = None
+    anchor_ratios: List[float] = None
 
 @dataclass(kw_only=True)
 class FCOS_Config(ModelConfig):
@@ -126,7 +132,6 @@ class FCOS_Config(ModelConfig):
 
     Extends ModelConfig without additional parameters.
     """
-    pass
 
 
 CONFIG_MAPPING = {
