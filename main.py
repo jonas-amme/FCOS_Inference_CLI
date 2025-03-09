@@ -374,5 +374,6 @@ def validate_config(
     except Exception as e:
         console.print(f"[red]Invalid configuration: {str(e)}[/red]")
         raise typer.Exit(1)
+ 
 if __name__ == "__main__":
     app()
