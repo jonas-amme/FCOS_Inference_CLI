@@ -1,0 +1,12 @@
+lightning
+numpy
+opencv_python
+openslide_python
+Pillow
+psutil
+PyYAML
+rich
+torch
+torchvision
+tqdm
+typer
