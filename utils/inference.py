@@ -64,6 +64,7 @@ class InferenceConfig:
 class ProcessorConfig:
     """Configuration for image processing."""
     save_dir: Optional[str] = None
+    overwrite: Optional[bool] = False
 
 
 class BaseInferenceDataset(Dataset, ABC):
@@ -565,6 +566,26 @@ class ImageProcessor:
 
 
 
+    def _check_if_proceed(
+        self, 
+        image_path: Union[str, Path],
+        output_dir: Optional[Union[str, Path]] = None
+    ) -> bool :
+        """Checks if the results already exist."""
+        output_dir = output_dir or self.config.save_dir
+        if output_dir:
+            output_path = Path(output_dir) / f"{Path(image_path).stem}_detections.json"
+            if output_path.exists() and not self.config.overwrite:
+                self.logger.info(f"Results already exist for: {image_path}. Skipping inference.")
+                return False
+            elif output_path.exists() and self.config.overwrite:
+                self.logger.info(f"Results already exist for {image_path}. Overwriting.")
+                return True
+        else:
+            return True
+        
+
+
     def process_single(
         self,
         image_path: Union[str, Path],
@@ -583,18 +604,21 @@ class ImageProcessor:
         Returns:
             Dictionary containing detection results
         """
-        # Run inference using strategy
-        results = self.strategy.process_image(
-            image_path,
-            patch_config=patch_config,
-            **kwargs
-        )
+        # Check if results exist
+        if self._check_if_proceed(image_path, output_dir):
 
-        # Save results if configured
-        if output_dir or self.config.save_dir:
-            self._save_results(results, image_path, output_dir)
+            # Run inference using strategy
+            results = self.strategy.process_image(
+                image_path,
+                patch_config=patch_config,
+                **kwargs
+            )
+            # Save results if configured
+            if output_dir or self.config.save_dir:
+                self._save_results(results, image_path, output_dir)
 
-        return results
+            return results 
+        
 
 
     def process_multi(
@@ -616,9 +640,13 @@ class ImageProcessor:
             Dictionary mapping image paths to their detection results
         """
         results = {}
+        
+        # Run over all images
         with tqdm(sorted(image_paths), desc="Processing images") as pbar:
             for image_path in pbar:
                 pbar.set_description(f"Processing {Path(image_path).name}")
+                
+                # Process each image individually 
                 results[str(image_path)] = self.process_single(
                     image_path,
                     patch_config=patch_config,

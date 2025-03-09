@@ -42,7 +42,8 @@ def setup_inference(
     num_workers: int,
     device: str,
     patch_size: int,
-    overlap: float
+    overlap: float,
+    overwrite: bool
 ) -> tuple:
     """Setup inference components."""
     inference_config = InferenceConfig(
@@ -57,10 +58,14 @@ def setup_inference(
         overlap=overlap
     )
 
+    processor_config = ProcessorConfig(
+        overwrite=overwrite
+    )
+
     strategy = Torchvision_Inference(model, inference_config)
     processor = ImageProcessor(
         strategy,
-        ProcessorConfig()
+        processor_config
     )
 
     return processor, patch_config
@@ -217,8 +222,14 @@ def detect(
     overlap: float = typer.Option(
         0.3,
         "--overlap",
-        "-o",
+        "-ol",
         help="Overlap between patches"
+    ),
+    overwrite: bool = typer.Option(
+        False, 
+        "--overwrite",
+        "-ow",
+        help="If existing results should be overwritten."
     ),
     measure_performance: bool = typer.Option(
         False, 
@@ -270,7 +281,7 @@ def detect(
         # Setup inference components
         processor, patch_config = setup_inference(
             model, is_wsi, batch_size, num_workers,
-            device, patch_size, overlap
+            device, patch_size, overlap, overwrite
         )
 
         # Define valid extensions based on image type
@@ -328,7 +339,7 @@ def detect(
             ) as progress:
                 task = progress.add_task(f"Processing {len(image_paths)} images...", total=len(image_paths))
 
-                for img_path in image_paths:
+                for img_path in sorted(image_paths):
                     if measure_performance:
                         start_time = time.time()
                         processor.process_single(img_path, patch_config=patch_config, output_dir=output_dir)
