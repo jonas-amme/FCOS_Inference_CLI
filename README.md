@@ -48,7 +48,7 @@ Perform object detection on a single image or a folder of images.
 
 #### Command Syntax:
 ```bash
-python cli.py detect CONFIG_PATH INPUT_PATH OUTPUT_DIR [OPTIONS]
+python main.py detect CONFIG_PATH INPUT_PATH OUTPUT_DIR [OPTIONS]
 ```
 
 #### Arguments:
@@ -67,22 +67,22 @@ python cli.py detect CONFIG_PATH INPUT_PATH OUTPUT_DIR [OPTIONS]
 #### Examples:
 - **View detect Options**
   ```bash
-  python cli.py detect --help
+  python main.py detect --help
   ```
 
 - **Single Image Inference**:
   ```bash
-  python cli.py detect configs/FCOS_18.yaml path/to/rois/roi_001.tif output_dir/
+  python main.py detect configs/FCOS_18.yaml path/to/rois/roi_001.tif output_dir/
   ```
 
 - **Batch Inference on Regular Images**:
   ```bash
-  python cli.py detect configs/FCOS_18.yaml path/to/rois output_dir/
+  python main.py detect configs/FCOS_18.yaml path/to/rois output_dir/
   ```
 
 - **Batch Inference on WSI Images**:
   ```bash
-  python cli.py detect configs/FCOS_18.yaml path/to/wsis output_dir/ --wsi
+  python main.py detect configs/FCOS_18.yaml path/to/wsis output_dir/ --wsi
   ```
 
 
@@ -92,7 +92,7 @@ Validate a model configuration file to ensure it is correctly formatted and comp
 
 #### Command Syntax:
 ```bash
-python cli.py validate-config CONFIG_PATH
+python main.py validate-config CONFIG_PATH
 ```
 
 #### Arguments:
@@ -100,7 +100,7 @@ python cli.py validate-config CONFIG_PATH
 
 #### Example:
 ```bash
-python cli.py validate-config configs/FCOS_18.yaml
+python main.py validate-config configs/FCOS_18.yaml
 ```
 
 
