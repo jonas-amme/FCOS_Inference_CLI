@@ -62,6 +62,11 @@ python cli.py detect CONFIG_PATH INPUT_PATH OUTPUT_DIR [OPTIONS]
 - `--overlap, -o`: Overlap between patches (0-1). Default is `0.3`.
 
 #### Examples:
+- **View detect Options**
+  ```bash
+  python cli.py detect --help
+  ```
+
 - **Single Image Inference**:
   ```bash
   python cli.py detect configs/FCOS_18.yaml path/to/rois/roi_001.tif output_dir/
@@ -77,7 +82,6 @@ python cli.py detect CONFIG_PATH INPUT_PATH OUTPUT_DIR [OPTIONS]
   python cli.py detect configs/FCOS_18.yaml path/to/wsis output_dir/ --wsi
   ```
 
----
 
 ### 2. `validate-config`
 
@@ -96,7 +100,6 @@ python cli.py validate-config CONFIG_PATH
 python cli.py validate-config configs/FCOS_18.yaml
 ```
 
----
 
 ## Configuration File Format
 
@@ -127,7 +130,6 @@ patch_size: 1024
 - `returned_layers`: Specific layers to return from the backbone (optional).
 - `patch_size`: Size of input patches (for WSI processing).
 
----
 
 ## Output
 
@@ -147,7 +149,6 @@ Example JSON output:
 }
 ```
 
----
 
 ## Supported File Types
 
@@ -157,19 +158,16 @@ Example JSON output:
 ### Whole Slide Images (WSI):
 - `.svs`, `.tif`, `.tiff`, `.dcm`, `.vms`, `.ndpi`, `.vmu`, `.mrxs`, `.czi`
 
----
 
----
 
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
----
 
 ## Acknowledgments
 
 - Built with [Typer](https://typer.tiangolo.com/) for CLI functionality.
 - Powered by [PyTorch](https://pytorch.org/) for deep learning inference.
 - Uses [Rich](https://rich.readthedocs.io/) for beautiful terminal output.
-```
+
