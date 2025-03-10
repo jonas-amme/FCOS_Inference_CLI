@@ -1,6 +1,5 @@
 backbone: resnext101_32x8d
-checkpoint: /home/ammeling/projects/Bhattacharyya/midog/checkpoints/LitFCOS_all_R101x_1024_midogpp_702010_cosLR_0_epoch74_val_ap_0.92.ckpt
-det_thresh: 0.548
+checkpoint: checkpoints/FCOS_x101.ckpt
 detector: FCOS
 extra_blocks: false
 model_name: FCOS_x101

@@ -1,1 +1,2 @@
 *.ckpt filter=lfs diff=lfs merge=lfs -text
+test/test.tiff filter=lfs diff=lfs merge=lfs -text
