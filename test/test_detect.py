@@ -13,7 +13,7 @@ def test_detect():
     """Test the `detect` command for single image inference."""
 
     # Setup test case 
-    input_path = Path('./test/test.tiff')
+    input_path = Path('./test/test_patch.tiff')
     output_dir = Path('./test')
     config_path = Path('./configs/FCOS_18.yaml')
 
@@ -32,7 +32,7 @@ def test_detect():
     assert result.exit_code == 0, f"CLI failed with error: {result.output}"
 
     # Check that the output directory contains the expected JSON result
-    output_file = Path('./test/test_detections.json')
+    output_file = Path('./test/test_patch_detections.json')
     assert output_file.exists(), "No output JSON file was created!"
 
     # Verify the contents of the JSON file
@@ -46,7 +46,7 @@ def test_detect():
 
 
     # Verify that the predictions are the same
-    test_file = "./test/FCOS_18_test_results.json"
+    test_file = "./test/test_patch_detection_precomputed.json"
     test_data = json.load(open(test_file, "r"))
     pred_data = json.load(open(output_file, "r"))
 
