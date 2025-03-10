@@ -37,6 +37,12 @@ source env/bin/activate
 pip install -r requirements.txt
 ```
 
+You can verify that your installation is working by running the test case.
+
+```bash
+pytest test/test_detect.py
+```
+
 
 ## Usage
 

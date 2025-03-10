@@ -1,10 +1,11 @@
+Pillow
+PyYAML
 lightning
 numpy
 opencv_python
 openslide_python
-Pillow
 psutil
-PyYAML
+pytest
 rich
 torch
 torchvision
