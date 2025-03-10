@@ -565,25 +565,21 @@ class ImageProcessor:
                 self.logger.error(f"Error saving results {image_path}: {str(e)}.")
 
 
-
-    def _check_if_proceed(
-        self, 
-        image_path: Union[str, Path],
-        output_dir: Optional[Union[str, Path]] = None
-    ) -> bool :
-        """Checks if the results already exist."""
-        output_dir = output_dir or self.config.save_dir
-        if output_dir:
-            output_path = Path(output_dir) / f"{Path(image_path).stem}_detections.json"
-            if output_path.exists() and not self.config.overwrite:
-                self.logger.info(f"Results already exist for: {image_path}. Skipping inference.")
-                return False
-            elif output_path.exists() and self.config.overwrite:
-                self.logger.info(f"Results already exist for {image_path}. Overwriting.")
-                return True
+    def should_proceed(
+            self, 
+            image_path: Union[str, Path],
+            output_dir: Optional[Union[str, Path]] = None
+    ) -> bool:
+        """Checks if image should be processed."""
+        result_path = Path(output_dir) / f"{Path(image_path).stem}_detections.json"
+        if result_path.exists() and not self.config.overwrite:
+            return False
+        elif result_path.exists() and self.config.overwrite:
+            return True
         else:
             return True
-        
+
+
 
 
     def process_single(
@@ -604,20 +600,17 @@ class ImageProcessor:
         Returns:
             Dictionary containing detection results
         """
-        # Check if results exist
-        if self._check_if_proceed(image_path, output_dir):
+        # Run inference using strategy
+        results = self.strategy.process_image(
+            image_path,
+            patch_config=patch_config,
+            **kwargs
+        )
+        # Save results if configured
+        if output_dir or self.config.save_dir:
+            self._save_results(results, image_path, output_dir)
 
-            # Run inference using strategy
-            results = self.strategy.process_image(
-                image_path,
-                patch_config=patch_config,
-                **kwargs
-            )
-            # Save results if configured
-            if output_dir or self.config.save_dir:
-                self._save_results(results, image_path, output_dir)
-
-            return results 
+        return results 
         
 
 
