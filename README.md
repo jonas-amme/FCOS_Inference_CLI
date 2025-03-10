@@ -3,7 +3,7 @@
 
 # FCOS Inference CLI
 
-A simgple command-line interface (CLI) application for performing mitotic figure object detection on microscopy images using trained models. This tool supports both single image and batch processing, with configurations for whole slide images (WSIs) and regular images (e.g. ROIs). It is built using [Typer](https://typer.tiangolo.com/) for a user-friendly interface and leverages PyTorch models for inference.
+A simple command-line interface (CLI) application for performing mitotic figure object detection on microscopy images using trained models. This tool supports both single image and batch processing, with configurations for whole slide images (WSIs) and regular images (e.g. ROIs). It is built using [Typer](https://typer.tiangolo.com/) for a user-friendly interface and leverages PyTorch models for inference.
 
 ## Features 
 - **Single Image Inference**: Perform object detection on a single image.
