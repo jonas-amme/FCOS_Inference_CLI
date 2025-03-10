@@ -305,16 +305,22 @@ def detect(
             # Single image processing
             console.print(f"\n[bold]Processing single image: {input_path.name}[/bold]")
 
-            if measure_performance:
-                start_time = time.time()
-                processor.process_single(input_path, patch_config=patch_config, output_dir=output_dir)
-                inference_time = time.time() - start_time
-                perf_monitor.record_iteration(inference_time)
+            if processor.should_proceed(input_path, output_dir):
+
+                if measure_performance:
+                    start_time = time.time()
+                    processor.process_single(input_path, patch_config=patch_config, output_dir=output_dir)
+                    inference_time = time.time() - start_time
+                    perf_monitor.record_iteration(inference_time)
+                else:
+                    processor.process_single(input_path, patch_config=patch_config, output_dir=output_dir)
+                
+                console.print(f"[green]Results saved to: {output_dir / f'{input_path.stem}_detections.json'}[/green]")
+            
             else:
-                processor.process_single(input_path, patch_config=patch_config, output_dir=output_dir)
-            
-            console.print(f"[green]Results saved to: {output_dir / f'{input_path.stem}_detections.json'}[/green]")
-            
+                console.print(f"[red]Results already exist for image: {input_path.name}[/red]")
+
+
 
         elif input_path.is_dir():
             # Batch processing
@@ -340,16 +346,22 @@ def detect(
                 task = progress.add_task(f"Processing {len(image_paths)} images...", total=len(image_paths))
 
                 for img_path in sorted(image_paths):
-                    if measure_performance:
-                        start_time = time.time()
-                        processor.process_single(img_path, patch_config=patch_config, output_dir=output_dir)
-                        inference_time = time.time() - start_time
-                        perf_monitor.record_iteration(inference_time)
-                    else:
-                        processor.process_single(img_path, patch_config=patch_config, output_dir=output_dir)
-                    progress.advance(task)
 
-            console.print(f"[green]Results saved to: {output_dir}[/green]")
+                    if processor.should_proceed(input_path, output_dir):
+                        if measure_performance:
+                            start_time = time.time()
+                            processor.process_single(img_path, patch_config=patch_config, output_dir=output_dir)
+                            inference_time = time.time() - start_time
+                            perf_monitor.record_iteration(inference_time)
+                        else:
+                            processor.process_single(img_path, patch_config=patch_config, output_dir=output_dir)
+                        progress.advance(task)
+
+                        console.print(f"[green]Results saved to: {output_dir}[/green]")
+                    
+                    else:
+                        console.print(f"[orange]Results already exist: {input_path.name}[/orange]")
+
 
         else:
             console.print("[red]Invalid input path![/red]")
