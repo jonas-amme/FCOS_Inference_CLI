@@ -1,11 +1,13 @@
 Pillow
 PyYAML
+faster-coco-eval
 lightning
 numpy
 opencv_python
 openslide_python
 psutil
 pytest
+requests
 rich
 torch
 torchvision
