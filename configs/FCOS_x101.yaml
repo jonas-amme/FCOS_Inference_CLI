@@ -1,5 +1,6 @@
 backbone: resnext101_32x8d
 checkpoint: checkpoints/FCOS_x101.ckpt
+det_thresh: 0.548
 detector: FCOS
 extra_blocks: false
 model_name: FCOS_x101
