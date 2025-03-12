@@ -37,6 +37,12 @@ source env/bin/activate
 pip install -r requirements.txt
 ```
 
+Download the provided model weights.
+
+```bash
+python3 download_weights.py
+```
+
 You can verify that your installation is working by running the test case.
 
 ```bash

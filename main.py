@@ -3,6 +3,7 @@ import psutil
 import time
 import torch
 import typer
+import os 
 
 from pathlib import Path
 from rich import box
@@ -25,6 +26,23 @@ from utils.inference import (
 app = typer.Typer(help="CLI for running object detection inference on medical images using trained models.")
 console = Console()
 
+
+def check_if_weights_exist():
+    """Check if the weights were downloaded."""
+    WEIGHTS_DIR = "checkpoints"
+    MODEL_FILES = [
+        "FCOS_18.ckpt",
+        "FCOS_x50.ckpt",
+        "FCOS_x101.ckpt"
+    ]
+    for model_file in MODEL_FILES:
+        model_path = os.path.join(WEIGHTS_DIR, model_file)
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(
+                f"Model weights not found at {model_path}. Please download them by running `python download_weights.py` or follow the instructions in the README."
+            )
+
+        
 def load_model_from_config(config_path: Path):
     """Load model from configuration file."""
     try:
@@ -242,6 +260,11 @@ def detect(
     Perform object detection on images using a trained model.
     """
     try:
+        # Check if model weights are downloaded
+        with console.status("[bold green]Checking model weights...") as status:
+            check_if_weights_exist()
+            status.update("[bold green]Models are ready to use!")
+
         # Load model
         with console.status("[bold green]Loading model...") as status:
             model, config = load_model_from_config(config_path)

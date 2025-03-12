@@ -176,3 +176,4 @@ cython_debug/
 
 # Individual stuff
 results/
+checkpoints/
